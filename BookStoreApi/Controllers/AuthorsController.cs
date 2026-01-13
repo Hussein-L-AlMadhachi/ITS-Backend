@@ -33,7 +33,7 @@ public class AuthorsController : ControllerBase
     {
         var newId = authors.Max(a => a.Id) + 1;
 
-        var author_found = authors.Where( a => a.Name.ToLower() == request.Name.ToLower() ).ToList();
+        var author_found = authors.Where(a => a.Name.Equals(request.Name, StringComparison.CurrentCultureIgnoreCase)).ToList();
         if ( author_found.Count == 0 )
         {
             return BadRequest("Book with this title already exists");
@@ -80,6 +80,8 @@ public class AuthorsController : ControllerBase
 
         if( request.Name is not null )
         {
+            if ( request.Name.Length < 3 )
+                return BadRequest("Author name must be at least 3 characters long");
             authors[id].Name = request.Name;
         }
 

@@ -86,7 +86,7 @@ public class SearchBooksRequest :
 
     public Book? Search( List<Book> books)
     {
-        return books.FirstOrDefault<Book>( b=> b.Title == query );
+        return books.FirstOrDefault<Book>( b => b.Title.Equals(query, StringComparison.CurrentCultureIgnoreCase) );
     }
 
 }

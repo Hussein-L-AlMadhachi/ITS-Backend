@@ -48,7 +48,7 @@ public class SearchAuthorsRequest :
 
     public Author? Search( List<Author> authors )
     {
-        return authors.FirstOrDefault<Author>( a=> a.Name == query );
+        return authors.FirstOrDefault<Author>( a => a.Name.Equals(query, StringComparison.CurrentCultureIgnoreCase) );
     }
 
 }

@@ -31,8 +31,8 @@ public class BooksController : ControllerBase
         var newId = Books.Max(b => b.Id) + 1;
         if (!allowedCategories.Contains(request.Category))
             return BadRequest("Category is invalid");
-        
-        var book_found = Books.Where( b => b.Title.ToLower() == request.Title.ToLower() ).ToList();
+
+        var book_found = Books.Where(b => b.Title.Equals(request.Title, StringComparison.CurrentCultureIgnoreCase)).ToList();
         if ( book_found.Count == 0 )
         {
             return BadRequest("Book with this title already exists");
@@ -99,7 +99,7 @@ public class BooksController : ControllerBase
     [HttpGet("/catagory/{catagory}")]
     public ActionResult<List<Book>> GetByCatagory( string catagory )
     {
-        var filtered = Books.Where( b => b.Category.ToLower() == catagory.ToLower() ).ToList();
+        var filtered = Books.Where(b => b.Category.Equals(catagory, StringComparison.CurrentCultureIgnoreCase)).ToList();
         return Ok( filtered );
     }
 
