@@ -1,6 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
-
 namespace BookStoreApi.Controllers;
+
+
+using Microsoft.AspNetCore.Mvc;
+using BookStoreApi.Features.Books;
+using BookStoreApi.Modules;
+
+
 
 [ApiController]
 [Route("/[controller]")]
@@ -19,11 +24,6 @@ public class BooksController : ControllerBase
     };
 
 
-    [HttpGet]
-    public ActionResult<List<Book>> Get()
-    {
-        return Ok(Books);
-    }
 
     [HttpPost]
     public ActionResult CreateBook([FromBody] BookRequest request)
@@ -31,6 +31,13 @@ public class BooksController : ControllerBase
         var newId = Books.Max(b => b.Id) + 1;
         if (!allowedCategories.Contains(request.Category))
             return BadRequest("Category is invalid");
+        
+        var book_found = Books.Where( b => b.Title.ToLower() == request.Title.ToLower() ).ToList();
+        if ( book_found.Count == 0 )
+        {
+            return BadRequest("Book with this title already exists");
+        }
+
         var newBook = new Book()
         {
             Title = request.Title,
@@ -41,11 +48,61 @@ public class BooksController : ControllerBase
         return Created();
     }
 
+    [HttpGet]
+    public ActionResult<PaginationResponse<Book> > Get( [FromQuery] SortBooksRequest req )
+    {
+        return Ok( req.Paginate(  req.Sort(Books)  ) );
+    }
+
     [HttpGet("{id:int}")]
     public ActionResult<Book> GetSingleBook(int id)
     {
-        return Books[0];
+        return Books[id];
     }
+
+    [HttpGet("search")]
+    public ActionResult<Book> Search( [FromQuery] SearchBooksRequest req )
+    {
+        Book? lookup = req.Search( Books );
+        if ( lookup is null)    return NotFound("Book not found");
+
+        return lookup;
+    }
+
+    [HttpPut("/{id:int}")]
+    public ActionResult UpdateBook( int id , [FromBody] BookRequest request)
+    {
+        try {
+            var book_found = Books[ id ];
+        } catch
+        {
+            return NotFound("Book not found");
+        }
+
+        if( request.Category is not null )
+        {
+            if( !allowedCategories.Contains(request.Category))
+            {
+                return BadRequest("Catagory is invalid");
+            }
+            Books[id].Category = request.Category;
+        }
+
+        if( request.Title is not null)
+        {
+            Books[id].Title = request.Title;
+        }
+
+        return NoContent();
+    }
+
+    [HttpGet("/catagory/{catagory}")]
+    public ActionResult<List<Book>> GetByCatagory( string catagory )
+    {
+        var filtered = Books.Where( b => b.Category.ToLower() == catagory.ToLower() ).ToList();
+        return Ok( filtered );
+    }
+
 
     [HttpDelete("{id}")]
     public ActionResult DeleteBook(int id)

@@ -1,6 +1,10 @@
+namespace BookStoreApi.helpers;
+
+
+
 using System.ComponentModel.DataAnnotations;
 
-namespace BookStoreApi;
+
 
 public class AllowedStringsAttribute(string[] allowedValues) : ValidationAttribute
 {
